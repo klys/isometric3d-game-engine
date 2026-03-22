@@ -47,7 +47,7 @@ namespace IsoSurvival
 
         public void Build()
         {
-            uiFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            uiFont = LoadBuiltinFont();
             var canvasObject = new GameObject("UI", typeof(RectTransform));
             canvas = canvasObject.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
@@ -338,6 +338,36 @@ namespace IsoSurvival
             text.alignment = alignment;
             text.text = content;
             return text;
+        }
+
+        private static Font LoadBuiltinFont()
+        {
+            var font = TryLoadBuiltinFont("LegacyRuntime.ttf");
+            if (font != null)
+            {
+                return font;
+            }
+
+            font = TryLoadBuiltinFont("Arial.ttf");
+            if (font != null)
+            {
+                return font;
+            }
+
+            Debug.LogError("No built-in runtime font could be loaded. UI text may not render correctly.");
+            return null;
+        }
+
+        private static Font TryLoadBuiltinFont(string fontName)
+        {
+            try
+            {
+                return Resources.GetBuiltinResource<Font>(fontName);
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }
