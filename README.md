@@ -49,3 +49,27 @@ The runtime bootstrapper creates the camera, light, UI, world, units, and gamepl
 - This is a gameplay foundation and vertical slice, not a finished production project.
 - The project uses primitive meshes and runtime-generated UI so it can run without prefabs or authored scenes.
 - If you want, the next step can be splitting this into authored scenes, prefabs, ScriptableObjects, and proper combat/pathfinding.
+
+## GitHub Actions Release Workflow
+
+The repository now includes [`.github/workflows/unity-release.yml`](.github/workflows/unity-release.yml), which:
+
+- runs on every push to `master`
+- builds separate Unity players for Linux, Windows, and macOS
+- uploads each build as a workflow artifact
+- creates a GitHub Release for that push and attaches the three packaged builds
+
+### Required Repository Secrets
+
+Set the Unity license secrets in GitHub before enabling the workflow:
+
+- `UNITY_LICENSE`
+- `UNITY_EMAIL`
+- `UNITY_PASSWORD`
+- `UNITY_SERIAL`
+
+For personal licenses, GameCI documents a one-time manual activation flow to obtain `UNITY_LICENSE`. For pro licenses, use your Unity serial plus account credentials.
+
+### Important Assumption
+
+This workflow uses `unityVersion: auto`, which means the repository should contain a valid Unity project with `ProjectSettings/ProjectVersion.txt`. If your Unity project lives in a subfolder later, update `projectPath`.

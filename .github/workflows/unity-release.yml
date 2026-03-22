@@ -1,0 +1,112 @@
+name: Unity Release Builds
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.label }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - targetPlatform: StandaloneLinux64
+            label: Linux
+            artifactName: build-linux
+            archiveName: isometric-game-engine-linux.zip
+          - targetPlatform: StandaloneWindows64
+            label: Windows
+            artifactName: build-windows
+            archiveName: isometric-game-engine-windows.zip
+          - targetPlatform: StandaloneOSX
+            label: macOS
+            artifactName: build-macos
+            archiveName: isometric-game-engine-macos.zip
+
+    env:
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+      UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ matrix.targetPlatform }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-${{ matrix.targetPlatform }}-
+            Library-
+
+      - name: Build Unity project
+        uses: game-ci/unity-builder@v4
+        with:
+          projectPath: .
+          unityVersion: auto
+          targetPlatform: ${{ matrix.targetPlatform }}
+          buildName: ${{ matrix.targetPlatform }}
+          buildsPath: build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifactName }}
+          path: build/${{ matrix.targetPlatform }}
+          if-no-files-found: error
+          retention-days: 7
+
+  publish-release:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v5
+        with:
+          path: release-artifacts
+
+      - name: Package release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+
+          cd release-artifacts/build-linux
+          zip -r ../../dist/isometric-game-engine-linux.zip .
+
+          cd ../build-windows
+          zip -r ../../dist/isometric-game-engine-windows.zip .
+
+          cd ../build-macos
+          zip -r ../../dist/isometric-game-engine-macos.zip .
+
+      - name: Create GitHub release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: master-build-${{ github.run_number }}-${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          short_sha="${GITHUB_SHA::7}"
+          gh release create "$RELEASE_TAG" dist/*.zip \
+            --repo "${GITHUB_REPOSITORY}" \
+            --target "${GITHUB_SHA}" \
+            --title "Master build ${GITHUB_RUN_NUMBER} (${short_sha})" \
+            --generate-notes
