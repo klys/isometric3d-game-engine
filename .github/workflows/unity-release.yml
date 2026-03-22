@@ -13,8 +13,46 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
+  validate-unity-license:
+    name: Validate Unity License Setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check required Unity secrets
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -n "${UNITY_LICENSE}" ]]; then
+            if [[ -z "${UNITY_EMAIL}" || -z "${UNITY_PASSWORD}" ]]; then
+              echo "::error::UNITY_LICENSE is set, but UNITY_EMAIL and UNITY_PASSWORD are also required for GameCI activation."
+              exit 1
+            fi
+
+            echo "Unity personal license secrets detected."
+            exit 0
+          fi
+
+          if [[ -n "${UNITY_SERIAL}" ]]; then
+            if [[ -z "${UNITY_EMAIL}" || -z "${UNITY_PASSWORD}" ]]; then
+              echo "::error::UNITY_SERIAL is set, but UNITY_EMAIL and UNITY_PASSWORD are also required for GameCI activation."
+              exit 1
+            fi
+
+            echo "Unity professional license secrets detected."
+            exit 0
+          fi
+
+          echo "::error::Missing Unity activation secrets. Set UNITY_LICENSE + UNITY_EMAIL + UNITY_PASSWORD for Personal, or UNITY_SERIAL + UNITY_EMAIL + UNITY_PASSWORD for Pro."
+          exit 1
+
   build:
     name: Build ${{ matrix.label }}
+    needs: validate-unity-license
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -47,7 +85,7 @@ jobs:
           lfs: true
 
       - name: Cache Unity Library
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: Library
           key: Library-${{ matrix.targetPlatform }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
@@ -59,7 +97,7 @@ jobs:
         uses: game-ci/unity-builder@v4
         with:
           projectPath: .
-          unityVersion: auto
+          unityVersion: 6000.0.69f1
           targetPlatform: ${{ matrix.targetPlatform }}
           buildName: ${{ matrix.targetPlatform }}
           buildsPath: build

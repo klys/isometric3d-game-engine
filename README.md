@@ -31,6 +31,8 @@ This repository now contains a self-bootstrapping Unity C# prototype for an isom
 
 The runtime bootstrapper creates the camera, light, UI, world, units, and gameplay systems automatically.
 
+Recommended Unity version: `6000.0.69f1` (Unity 6.0 LTS, released March 4, 2026).
+
 ## Controls
 
 - `Left Click`: select humanoids
@@ -63,19 +65,31 @@ The repository now includes [`.github/workflows/unity-release.yml`](.github/work
 
 Set the Unity license secrets in GitHub before enabling the workflow:
 
+- Personal license:
 - `UNITY_LICENSE`
 - `UNITY_EMAIL`
 - `UNITY_PASSWORD`
+- Professional license:
 - `UNITY_SERIAL`
+- `UNITY_EMAIL`
+- `UNITY_PASSWORD`
 
 For personal licenses, GameCI documents a one-time manual activation flow to obtain `UNITY_LICENSE`. For pro licenses, use your Unity serial plus account credentials.
 
+Add secrets here:
+
+1. Open your GitHub repository.
+2. Go to `Settings`.
+3. Open `Secrets and variables` > `Actions`.
+4. Create the needed `UNITY_*` secrets.
+
 ### Important Assumption
 
-This workflow uses `unityVersion: auto`, which means the repository must contain a valid Unity project with `ProjectSettings/ProjectVersion.txt`. The repository now includes minimal Unity project scaffolding for CI. If your Unity project lives in a subfolder later, update `projectPath`.
+This workflow is pinned to Unity `6000.0.69f1`. The repository also includes matching `ProjectSettings/ProjectVersion.txt` so local and CI builds stay aligned. If your Unity project lives in a subfolder later, update `projectPath`.
 
 ### About The Warnings You Saw
 
 - `Project settings file not found`: this was the real blocker, caused by the repo not yet having Unity `ProjectSettings/` and `Packages/` files.
+- `Missing Unity License File and no Serial was found`: this means GitHub Actions cannot activate Unity yet because the required `UNITY_*` secrets are still missing or incomplete.
 - `Library folder does not exist`: this is normal on a first CI build and is only a cache warmup warning.
 - `Node.js 20 actions are deprecated`: this is an ecosystem warning from GitHub Actions. The workflow now opts into Node 24 and uses `actions/checkout@v5` to reduce that risk.
