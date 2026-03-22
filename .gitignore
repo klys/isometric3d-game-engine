@@ -1,0 +1,57 @@
+# Unity generated folders
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Mm]emoryCaptures/
+[Uu]ser[Ss]ettings/
+
+# Asset import cache
+Assets/AssetStoreTools*
+
+# Visual Studio / Rider
+.vs/
+.vscode/
+.idea/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# Unity meta data for generated files
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# Crash reports
+sysinfo.txt
+
+# Builds and packages
+*.apk
+*.aab
+*.unitypackage
+
+# Addressables / generated data
+Assets/StreamingAssets/aa.meta
+Assets/StreamingAssets/aa/
+
+# Ignore generated plugin files
+*.apk.meta
+*.aab.meta
+
+# macOS / Windows noise
+.DS_Store
+Thumbs.db
+Desktop.ini
