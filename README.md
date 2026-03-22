@@ -72,4 +72,10 @@ For personal licenses, GameCI documents a one-time manual activation flow to obt
 
 ### Important Assumption
 
-This workflow uses `unityVersion: auto`, which means the repository should contain a valid Unity project with `ProjectSettings/ProjectVersion.txt`. If your Unity project lives in a subfolder later, update `projectPath`.
+This workflow uses `unityVersion: auto`, which means the repository must contain a valid Unity project with `ProjectSettings/ProjectVersion.txt`. The repository now includes minimal Unity project scaffolding for CI. If your Unity project lives in a subfolder later, update `projectPath`.
+
+### About The Warnings You Saw
+
+- `Project settings file not found`: this was the real blocker, caused by the repo not yet having Unity `ProjectSettings/` and `Packages/` files.
+- `Library folder does not exist`: this is normal on a first CI build and is only a cache warmup warning.
+- `Node.js 20 actions are deprecated`: this is an ecosystem warning from GitHub Actions. The workflow now opts into Node 24 and uses `actions/checkout@v5` to reduce that risk.
