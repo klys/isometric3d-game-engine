@@ -31,7 +31,7 @@ This repository now contains a self-bootstrapping Unity C# prototype for an isom
 
 The runtime bootstrapper creates the camera, light, UI, world, units, and gameplay systems automatically.
 
-Recommended Unity version: `6000.0.69f1` (Unity 6.0 LTS, released March 4, 2026).
+Recommended Unity version: `6000.3.9f1`.
 
 ## Controls
 
@@ -63,7 +63,7 @@ The repository now includes [`.github/workflows/unity-release.yml`](.github/work
 
 ### Required Repository Secrets
 
-Set the Unity license secrets in GitHub before enabling the workflow:
+Set the Unity license secrets in GitHub before enabling actual Unity builds:
 
 - Personal license:
 - `UNITY_LICENSE`
@@ -83,13 +83,15 @@ Add secrets here:
 3. Open `Secrets and variables` > `Actions`.
 4. Create the needed `UNITY_*` secrets.
 
+If the Unity secrets are missing, the workflow now skips the build and release jobs instead of failing the whole pipeline.
+
 ### Important Assumption
 
-This workflow is pinned to Unity `6000.0.69f1`. The repository also includes matching `ProjectSettings/ProjectVersion.txt` so local and CI builds stay aligned. If your Unity project lives in a subfolder later, update `projectPath`.
+This workflow is pinned to Unity `6000.3.9f1`. The repository also includes matching `ProjectSettings/ProjectVersion.txt` so local and CI builds stay aligned. If your Unity project lives in a subfolder later, update `projectPath`.
 
 ### About The Warnings You Saw
 
 - `Project settings file not found`: this was the real blocker, caused by the repo not yet having Unity `ProjectSettings/` and `Packages/` files.
-- `Missing Unity License File and no Serial was found`: this means GitHub Actions cannot activate Unity yet because the required `UNITY_*` secrets are still missing or incomplete.
+- `Missing Unity License File and no Serial was found`: this means GitHub Actions cannot activate Unity yet because the required `UNITY_*` secrets are still missing or incomplete. The workflow now skips builds earlier when secrets are not configured.
 - `Library folder does not exist`: this is normal on a first CI build and is only a cache warmup warning.
 - `Node.js 20 actions are deprecated`: this is an ecosystem warning from GitHub Actions. The workflow now opts into Node 24 and uses `actions/checkout@v5` to reduce that risk.
